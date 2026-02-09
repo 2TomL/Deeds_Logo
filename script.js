@@ -98,17 +98,12 @@ function init() {
         var cube = new THREE.Mesh(geometry, material);
         cube.userData.isTower = true;
         var wire = new THREE.Mesh(geometry, wmaterial);
-        var floor = new THREE.Mesh(geometry, material);
-        floor.userData.isFloor = true;
         var wfloor = new THREE.Mesh(geometry, wmaterial);
     
         cube.add(wfloor);
         cube.castShadow = true;
         cube.receiveShadow = true;
         cube.rotationValue = 0.1+Math.abs(mathRandom(8));
-    
-        //floor.scale.x = floor.scale.z = 1+mathRandom(0.33);
-        floor.scale.y = 0.05;//+mathRandom(0.5);
         cube.scale.y = 0.1+Math.abs(mathRandom(8));
         cube.scale.y = Math.min(cube.scale.y, 3);
         //TweenMax.to(cube.scale, 1, {y:cube.rotationValue, repeat:-1, yoyo:true, delay:i*0.005, ease:Power1.easeInOut});
@@ -144,9 +139,6 @@ function init() {
             centralTallestCube = cube;
         }
     
-        floor.position.set(cube.position.x, 0/*floor.scale.y / 2*/, cube.position.z)
-    
-        town.add(floor);
         town.add(cube);
     };
     //----------------------------------------------------------------- Particular
@@ -188,7 +180,7 @@ function init() {
             var dx = obj.position.x - targetCube.position.x;
             var dz = obj.position.z - targetCube.position.z;
             var dist = Math.sqrt((dx * dx) + (dz * dz));
-            if (dist < 0.9) {
+            if (dist < 1.5) {
                 town.remove(obj);
             }
         }
@@ -237,8 +229,8 @@ function init() {
 
             textMesh.rotation.x = -Math.PI / 2;
             var textPosX = targetCube.position.x - (textWidth / 2);
-            var textPosY = 0;
-            var textPosZ = targetCube.position.z + (topDiameter * 1.15) + (textDepth / 2);
+            var textPosY = 0.01;
+            var textPosZ = targetCube.position.z + (topDiameter * 0.65) + (textDepth / 2);
             textMesh.position.set(textPosX, textPosY, textPosZ);
             var textCenterX = textPosX + (textWidth / 2);
             var textCenterZ = textPosZ;
@@ -250,7 +242,7 @@ function init() {
                 var dxText = tower.position.x - textCenterX;
                 var dzText = tower.position.z - textCenterZ;
                 var distText = Math.sqrt((dxText * dxText) + (dzText * dzText));
-                if (distText < (topDiameter * 0.9)) {
+                if (distText < (topDiameter * 1.8)) {
                     town.remove(tower);
                 }
             }
