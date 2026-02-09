@@ -221,10 +221,11 @@ function init() {
         var fontLoader = new THREE.FontLoader();
         fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', function(font) {
             var textSize = Math.max(0.25, topDiameter * 0.35);
+            var textHeight = Math.max(0.1, (targetCube.scale.y / 2) - 0.6);
             var textGeo = new THREE.TextGeometry('D E E D S', {
                 font: font,
                 size: textSize,
-                height: 0.08,
+                height: textHeight,
                 curveSegments: 6,
                 bevelEnabled: false
             });
@@ -236,7 +237,7 @@ function init() {
 
             textMesh.rotation.x = -Math.PI / 2;
             var textPosX = targetCube.position.x - (textWidth / 2);
-            var textPosY = (targetCube.scale.y / 2) - 0.45;
+            var textPosY = 0;
             var textPosZ = targetCube.position.z + (topDiameter * 1.15) + (textDepth / 2);
             textMesh.position.set(textPosX, textPosY, textPosZ);
             var textCenterX = textPosX + (textWidth / 2);
