@@ -195,7 +195,7 @@ function init() {
 
         targetCube.scale.x *= 1.6;
         targetCube.scale.z *= 1.6;
-        targetCube.scale.y *= 0.85;
+        targetCube.scale.y *= 1.05;
         var topDiameter = targetCube.scale.x;
         var stickerSize = Math.max(0.5, topDiameter * 0.75);
         var stickerGeo = new THREE.PlaneGeometry(stickerSize, stickerSize);
