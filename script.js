@@ -217,6 +217,46 @@ function init() {
             sticker.renderOrder = 10;
             town.add(sticker);
         });
+
+        var fontLoader = new THREE.FontLoader();
+        fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', function(font) {
+            var textSize = Math.max(0.25, topDiameter * 0.35);
+            var textGeo = new THREE.TextGeometry('D E E D S', {
+                font: font,
+                size: textSize,
+                height: 0.08,
+                curveSegments: 6,
+                bevelEnabled: false
+            });
+            textGeo.computeBoundingBox();
+            var textMat = new THREE.MeshPhongMaterial({ color: 0x000000 });
+            var textMesh = new THREE.Mesh(textGeo, textMat);
+            var textWidth = textGeo.boundingBox.max.x - textGeo.boundingBox.min.x;
+            var textDepth = textGeo.boundingBox.max.z - textGeo.boundingBox.min.z;
+
+            textMesh.rotation.x = -Math.PI / 2;
+            var textPosX = targetCube.position.x - (textWidth / 2);
+            var textPosY = (targetCube.scale.y / 2) - 0.45;
+            var textPosZ = targetCube.position.z + (topDiameter * 1.15) + (textDepth / 2);
+            textMesh.position.set(textPosX, textPosY, textPosZ);
+            var textCenterX = textPosX + (textWidth / 2);
+            var textCenterZ = textPosZ;
+            for (var j = town.children.length - 1; j >= 0; j--) {
+                var tower = town.children[j];
+                if (!tower.userData || !tower.userData.isTower || tower === targetCube) {
+                    continue;
+                }
+                var dxText = tower.position.x - textCenterX;
+                var dzText = tower.position.z - textCenterZ;
+                var distText = Math.sqrt((dxText * dxText) + (dzText * dzText));
+                if (distText < (topDiameter * 0.9)) {
+                    town.remove(tower);
+                }
+            }
+            textMesh.castShadow = true;
+            textMesh.receiveShadow = true;
+            town.add(textMesh);
+        });
     }
 };
 
