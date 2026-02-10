@@ -425,6 +425,39 @@ function init() {
             textMesh2.receiveShadow = true;
             town.add(textMesh2);
         });
+
+        // ROC Esports logo met glitch effect op de grond
+        var rocTextureLoader = new THREE.TextureLoader();
+        rocTextureLoader.load('assets/ROC_Esports_2024_allmode.png', function(rocTexture) {
+            rocTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            
+            var logoSize = topDiameter * 0.55;
+            var logoGeo = new THREE.PlaneGeometry(logoSize, logoSize);
+            
+            // Maak meerdere lagen voor glitch/raster effect
+            for (var glitchLayer = 0; glitchLayer < 5; glitchLayer++) {
+                var logoMat = new THREE.MeshBasicMaterial({
+                    map: rocTexture,
+                    transparent: true,
+                    opacity: 0.3 - (glitchLayer * 0.05),
+                    side: THREE.DoubleSide,
+                    color: glitchLayer % 2 === 0 ? 0xFFFFFF : 0xFF00FF
+                });
+                var logoMesh = new THREE.Mesh(logoGeo, logoMat);
+                logoMesh.rotation.x = -Math.PI / 2;
+                
+                // Positioneer op de grond met kleine random offsets voor glitch effect
+                var offsetX = (Math.random() - 0.5) * 0.05;
+                var offsetZ = (Math.random() - 0.5) * 0.05;
+                logoMesh.position.set(
+                    targetCube.position.x - topDiameter * 0.8 + offsetX,
+                    0.015 + (glitchLayer * 0.001),
+                    targetCube.position.z + offsetZ
+                );
+                logoMesh.renderOrder = 5 + glitchLayer;
+                town.add(logoMesh);
+            }
+        });
     }
 };
 
