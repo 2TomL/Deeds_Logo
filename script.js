@@ -23,7 +23,7 @@ function onWindowResize() {
 
 var camera = new THREE.PerspectiveCamera( 20, window.innerWidth / window.innerHeight, 1, 500 );
 
-camera.position.set(0, 2, 14);
+camera.position.set(0, 2, 17);
 
 var scene = new THREE.Scene();
 var city = new THREE.Object3D();
@@ -73,7 +73,7 @@ var setcolor = 0xF02050;
 //var setcolor = 0xFF6347;
 
 scene.background = new THREE.Color(setcolor);
-scene.fog = new THREE.Fog(setcolor, 10, 16);
+scene.fog = new THREE.Fog(setcolor, 12, 22);
 //scene.fog = new THREE.FogExp2(setcolor, 0.05);
 //----------------------------------------------------------------- RANDOM Function
 function mathRandom(num = 8) {
@@ -394,10 +394,10 @@ function init() {
             textMesh.receiveShadow = true;
             town.add(textMesh);
 
-            // Voeg tweede tekst toe: "APEX DemiGOD Lord Gamer"
+            // Voeg tweede tekst toe: "APEX Demi-GOD Lord Gamer"
             var textSize2 = textSize * 0.25; // Kleiner lettertype (25% van DEEDS)
             var textHeight2 = textHeight * 0.8; // Iets minder diepte
-            var textGeo2 = new THREE.TextGeometry('APEX DemiGOD Lord Gamer', {
+            var textGeo2 = new THREE.TextGeometry('APEX Demi-GOD Lord Gamer', {
                 font: font,
                 size: textSize2,
                 height: textHeight2,
