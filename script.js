@@ -277,6 +277,9 @@ function init() {
             downLeftTower.position.z = targetCube.position.z - ringDist * 0.6;
         }
 
+        // Bereken de texthoogte zoals die ook voor de naam gebruikt wordt
+        var textHeight = Math.max(0.1, (targetCube.scale.y / 2) - 0.6);
+        
         var videoTargets = [upTower, rightTower, downLeftTower];
         for (var v = 0; v < videoTargets.length; v++) {
             var t = videoTargets[v];
@@ -284,6 +287,9 @@ function init() {
 
             // Markeer zodat ze niet later worden weggefilterd
             t.userData.hasVideo = true;
+
+            // Maak de video-torens even hoog als de naam
+            t.scale.y = textHeight;
 
             // Maak de video-torens nog breder zodat hun top en video-oppervlak groter zijn
             t.scale.x *= 1.8;
@@ -304,6 +310,26 @@ function init() {
             videoMesh.position.set(t.position.x, topY, t.position.z);
             videoMesh.renderOrder = 20;
             town.add(videoMesh);
+        }
+
+        // Verwijder torens die te dicht bij de video-torens staan
+        for (var v = 0; v < videoTargets.length; v++) {
+            var videoTower = videoTargets[v];
+            if (!videoTower) continue;
+            
+            for (var j = town.children.length - 1; j >= 0; j--) {
+                var tower = town.children[j];
+                if (!tower.userData || !tower.userData.isTower || tower === targetCube || tower.userData.hasVideo) {
+                    continue;
+                }
+                var dxVideo = tower.position.x - videoTower.position.x;
+                var dzVideo = tower.position.z - videoTower.position.z;
+                var distVideo = Math.sqrt((dxVideo * dxVideo) + (dzVideo * dzVideo));
+                // Verwijder torens binnen een straal van 1.5 eenheden van de video-toren
+                if (distVideo < 1.5) {
+                    town.remove(tower);
+                }
+            }
         }
 
         // Logo-sticker bovenop de centrale toren
@@ -367,6 +393,37 @@ function init() {
             textMesh.castShadow = true;
             textMesh.receiveShadow = true;
             town.add(textMesh);
+
+            // Voeg tweede tekst toe: "APEX DemiGOD Lord Gamer"
+            var textSize2 = textSize * 0.25; // Kleiner lettertype (25% van DEEDS)
+            var textHeight2 = textHeight * 0.8; // Iets minder diepte
+            var textGeo2 = new THREE.TextGeometry('APEX DemiGOD Lord Gamer', {
+                font: font,
+                size: textSize2,
+                height: textHeight2,
+                curveSegments: 6,
+                bevelEnabled: false
+            });
+            textGeo2.computeBoundingBox();
+            var textMat2 = new THREE.MeshPhongMaterial({ color: 0x000000 });
+            var textMesh2 = new THREE.Mesh(textGeo2, textMat2);
+            var textWidth2 = textGeo2.boundingBox.max.x - textGeo2.boundingBox.min.x;
+            var textDepth2 = textGeo2.boundingBox.max.z - textGeo2.boundingBox.min.z;
+
+            // Schaal de tweede tekst zodat deze even breed is als DEEDS
+            var scaleRatio = textWidth / textWidth2;
+            textMesh2.scale.x = scaleRatio;
+
+            textMesh2.rotation.x = -Math.PI / 2;
+            var textPosX2 = targetCube.position.x - (textWidth / 2);
+            var textPosY2 = 0.01;
+            // Positioneer direct onder de DEEDS tekst, veel dichter
+            var textPosZ2 = textPosZ + (textDepth / 2) + (textDepth2 / 2) - 0.65;
+            textMesh2.position.set(textPosX2, textPosY2, textPosZ2);
+
+            textMesh2.castShadow = true;
+            textMesh2.receiveShadow = true;
+            town.add(textMesh2);
         });
     }
 };
