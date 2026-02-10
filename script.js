@@ -418,7 +418,7 @@ function init() {
             var textPosX2 = targetCube.position.x - (textWidth / 2);
             var textPosY2 = 0.01;
             // Positioneer direct onder de DEEDS tekst, veel dichter
-            var textPosZ2 = textPosZ + (textDepth / 2) + (textDepth2 / 2) - 0.65;
+            var textPosZ2 = textPosZ + (textDepth / 2) + (textDepth2 / 2) - 0.5;
             textMesh2.position.set(textPosX2, textPosY2, textPosZ2);
 
             textMesh2.castShadow = true;
