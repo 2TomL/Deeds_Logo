@@ -31,7 +31,9 @@ var smoke = new THREE.Object3D();
 var town = new THREE.Object3D();
 
 var createCarPos = true;
-var uSpeed = 0.001;
+var uSpeed = 0.0006;
+var uSpeedTouch = 0.0002;
+var isTouchDevice = false;
 
 var centralCube = null;
 var centralDistance = Infinity;
@@ -175,7 +177,7 @@ function init() {
     var gparticular = new THREE.CircleGeometry(0.01, 3);
     var aparticular = 5;
   
-    for (var h = 1; h<300; h++) {
+    for (var h = 1; h<200; h++) {
         var particular = new THREE.Mesh(gparticular, gmaterial);
         particular.position.set(mathRandom(aparticular), mathRandom(aparticular),mathRandom(aparticular));
         particular.rotation.set(mathRandom(),mathRandom(),mathRandom());
@@ -263,18 +265,18 @@ function init() {
         }
 
         // Verplaats de gekozen torens dichter bij de logo-toren
-        var ringDist = topDiameter * 1.4;
+        var ringDist = topDiameter * 2.0;
         if (upTower) {
             upTower.position.x = targetCube.position.x;
-            upTower.position.z = targetCube.position.z + ringDist;
+            upTower.position.z = targetCube.position.z + ringDist * 0.75;
         }
         if (rightTower) {
-            rightTower.position.x = targetCube.position.x + ringDist;
+            rightTower.position.x = targetCube.position.x + ringDist * 0.7;
             rightTower.position.z = targetCube.position.z + topDiameter * 0.2;
         }
         if (downLeftTower) {
-            downLeftTower.position.x = targetCube.position.x - ringDist * 0.7;
-            downLeftTower.position.z = targetCube.position.z - ringDist * 0.6;
+            downLeftTower.position.x = targetCube.position.x - ringDist * 0.5;
+            downLeftTower.position.z = targetCube.position.z - ringDist * 0.5;
         }
 
         // Bereken de texthoogte zoals die ook voor de naam gebruikt wordt
@@ -292,8 +294,8 @@ function init() {
             t.scale.y = textHeight;
 
             // Maak de video-torens nog breder zodat hun top en video-oppervlak groter zijn
-            t.scale.x *= 1.8;
-            t.scale.z *= 1.8;
+            t.scale.x *= 2.5;
+            t.scale.z *= 2.5;
 
             // Radius van 5-hoek vrijwel gelijk aan die van de toren
             var radius = 0.5 * t.scale.x * 0.999;
@@ -424,6 +426,38 @@ function init() {
             textMesh2.castShadow = true;
             textMesh2.receiveShadow = true;
             town.add(textMesh2);
+
+            // "made by Mikey" - subtiele gegraveerde tekst op de vloer
+            var mikeyTextSize = textSize * 0.15; // Veel kleiner (15% van DEEDS)
+            var mikeyTextHeight = 0.02; // Heel plat voor gegraveerd effect
+            var mikeyTextGeo = new THREE.TextGeometry('made by Mikey', {
+                font: font,
+                size: mikeyTextSize,
+                height: mikeyTextHeight,
+                curveSegments: 4,
+                bevelEnabled: false
+            });
+            mikeyTextGeo.computeBoundingBox();
+            // Zwarte kleur voor gegraveerd/gekerfd effect
+            var mikeyTextMat = new THREE.MeshPhongMaterial({ 
+                color: 0x000000,
+                emissive: 0x000000,
+                shininess: 1,
+                specular: 0x111111
+            });
+            var mikeyTextMesh = new THREE.Mesh(mikeyTextGeo, mikeyTextMat);
+            var mikeyTextWidth = mikeyTextGeo.boundingBox.max.x - mikeyTextGeo.boundingBox.min.x;
+            var mikeyTextDepth = mikeyTextGeo.boundingBox.max.z - mikeyTextGeo.boundingBox.min.z;
+
+            mikeyTextMesh.rotation.x = -Math.PI / 2;
+            // Positioneer rechtsonder, aan de kant van de kijker
+            var mikeyPosX = targetCube.position.x + topDiameter * 1.8;
+            var mikeyPosY = -0.005; // Iets in de vloer voor gekerfd effect
+            var mikeyPosZ = targetCube.position.z + topDiameter * 3.0; // Nog veel verder naar voren
+            mikeyTextMesh.position.set(mikeyPosX, mikeyPosY, mikeyPosZ);
+            
+            mikeyTextMesh.receiveShadow = true;
+            town.add(mikeyTextMesh);
         });
 
         // ROC Esports logo met glitch effect op de grond
@@ -431,7 +465,7 @@ function init() {
         rocTextureLoader.load('assets/ROC_Esports_2024_allmode.png', function(rocTexture) {
             rocTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
             
-            var logoSize = topDiameter * 0.55;
+            var logoSize = topDiameter * 0.48;
             var logoGeo = new THREE.PlaneGeometry(logoSize, logoSize);
             
             // Maak meerdere lagen voor glitch/raster effect
@@ -474,15 +508,17 @@ function onMouseMove(event) {
 function onDocumentTouchStart( event ) {
     if ( event.touches.length == 1 ) {
         event.preventDefault();
-        mouse.x = event.touches[ 0 ].pageX -  window.innerWidth / 2;
-        mouse.y = event.touches[ 0 ].pageY - window.innerHeight / 2;
+        isTouchDevice = true;
+        mouse.x = (event.touches[ 0 ].pageX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.touches[ 0 ].pageY / window.innerHeight) * 2 + 1;
     };
 };
 function onDocumentTouchMove( event ) {
     if ( event.touches.length == 1 ) {
         event.preventDefault();
-        mouse.x = event.touches[ 0 ].pageX -  window.innerWidth / 2;
-        mouse.y = event.touches[ 0 ].pageY - window.innerHeight / 2;
+        isTouchDevice = true;
+        mouse.x = (event.touches[ 0 ].pageX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.touches[ 0 ].pageY / window.innerHeight) * 2 + 1;
     }
 }
 window.addEventListener('mousemove', onMouseMove, false);
@@ -570,8 +606,9 @@ var animate = function() {
     var time = Date.now() * 0.00005;
     requestAnimationFrame(animate);
   
-    city.rotation.y -= ((mouse.x * 8) - camera.rotation.y) * uSpeed;
-    city.rotation.x -= (-(mouse.y * 2) - camera.rotation.x) * uSpeed;
+    var currentSpeed = isTouchDevice ? uSpeedTouch : uSpeed;
+    city.rotation.y -= ((mouse.x * 8) - camera.rotation.y) * currentSpeed;
+    city.rotation.x -= (-(mouse.y * 2) - camera.rotation.x) * currentSpeed;
     if (city.rotation.x < -0.05) city.rotation.x = -0.05;
     else if (city.rotation.x>1) city.rotation.x = 1;
     var cityRotation = Math.sin(Date.now() / 5000) * 13;
