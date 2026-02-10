@@ -306,7 +306,7 @@ function init() {
             });
             var videoMesh = new THREE.Mesh(videoGeo, videoMat);
             videoMesh.rotation.x = -Math.PI / 2;
-            videoMesh.rotation.z = -THREE.Math.degToRad(16);
+            videoMesh.rotation.z = -THREE.Math.degToRad(18);
             videoMesh.position.set(t.position.x, topY, t.position.z);
             videoMesh.renderOrder = 20;
             town.add(videoMesh);
