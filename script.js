@@ -38,6 +38,34 @@ var centralDistance = Infinity;
 var centralTallestCube = null;
 var centralTallestHeight = -Infinity;
 
+// Video textures for three towers around the logo tower
+function createVideoTexture(src) {
+    var video = document.createElement('video');
+    video.src = src;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.crossOrigin = 'anonymous';
+    video.style.display = 'none';
+    document.body.appendChild(video);
+    // Start playback (muted autoplay is meestal toegestaan)
+    video.play();
+
+    var texture = new THREE.VideoTexture(video);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.format = THREE.RGBFormat;
+    return texture;
+}
+
+// Gebruik drie lokale tower-video's uit de assets-map
+var videoTextures = [
+    createVideoTexture('assets/Untitled video - Made with Clipchamp.mp4'),
+    createVideoTexture('assets/345.mp4'),
+    createVideoTexture('assets/Untitled video - Made with Clipchamp (1).mp4')
+];
+
 //----------------------------------------------------------------- FOG background
 
 var setcolor = 0xF02050;
@@ -172,6 +200,7 @@ function init() {
 
     var targetCube = centralTallestCube || centralCube;
     if (targetCube) {
+        // Eerst omgeving rond de logo-toren wat vrijmaken
         for (var i = town.children.length - 1; i >= 0; i--) {
             var obj = town.children[i];
             if (!obj.userData || !obj.userData.isTower || obj === targetCube) {
@@ -185,10 +214,99 @@ function init() {
             }
         }
 
-        targetCube.scale.x *= 1.6;
-        targetCube.scale.z *= 1.6;
+        // Schaal de logo-toren (nog bredere top)
+        targetCube.scale.x *= 2.6;
+        targetCube.scale.z *= 2.6;
         targetCube.scale.y *= 1.05;
         var topDiameter = targetCube.scale.x;
+
+        // Kies drie andere torens voor video (boven, rechts, onder-links)
+        var upTower = null;
+        var rightTower = null;
+        var downLeftTower = null;
+        for (var k = 0; k < town.children.length; k++) {
+            var towerCandidate = town.children[k];
+            if (!towerCandidate.userData || !towerCandidate.userData.isTower || towerCandidate === targetCube) {
+                continue;
+            }
+            var dxv = towerCandidate.position.x - targetCube.position.x;
+            var dzv = towerCandidate.position.z - targetCube.position.z;
+
+            // Boven (in de richting van +Z, ongeveer boven de naam)
+            if (dzv > 0 && Math.abs(dxv) < 2) {
+                if (!upTower || dzv > (upTower.position.z - targetCube.position.z)) {
+                    upTower = towerCandidate;
+                }
+            }
+
+            // Rechts (x > target)
+            if (dxv > 0) {
+                if (!rightTower || dxv > (rightTower.position.x - targetCube.position.x)) {
+                    rightTower = towerCandidate;
+                }
+            }
+
+            // Onder-links (x < target en z < target)
+            if (dxv < 0 && dzv < 0) {
+                var curDist = Math.sqrt(dxv * dxv + dzv * dzv);
+                if (!downLeftTower) {
+                    downLeftTower = towerCandidate;
+                } else {
+                    var oldDx = downLeftTower.position.x - targetCube.position.x;
+                    var oldDz = downLeftTower.position.z - targetCube.position.z;
+                    var oldDist = Math.sqrt(oldDx * oldDx + oldDz * oldDz);
+                    if (curDist > oldDist) {
+                        downLeftTower = towerCandidate;
+                    }
+                }
+            }
+        }
+
+        // Verplaats de gekozen torens dichter bij de logo-toren
+        var ringDist = topDiameter * 1.4;
+        if (upTower) {
+            upTower.position.x = targetCube.position.x;
+            upTower.position.z = targetCube.position.z + ringDist;
+        }
+        if (rightTower) {
+            rightTower.position.x = targetCube.position.x + ringDist;
+            rightTower.position.z = targetCube.position.z + topDiameter * 0.2;
+        }
+        if (downLeftTower) {
+            downLeftTower.position.x = targetCube.position.x - ringDist * 0.7;
+            downLeftTower.position.z = targetCube.position.z - ringDist * 0.6;
+        }
+
+        var videoTargets = [upTower, rightTower, downLeftTower];
+        for (var v = 0; v < videoTargets.length; v++) {
+            var t = videoTargets[v];
+            if (!t || !videoTextures[v]) continue;
+
+            // Markeer zodat ze niet later worden weggefilterd
+            t.userData.hasVideo = true;
+
+            // Maak de video-torens nog breder zodat hun top en video-oppervlak groter zijn
+            t.scale.x *= 1.8;
+            t.scale.z *= 1.8;
+
+            // Radius van 5-hoek vrijwel gelijk aan die van de toren
+            var radius = 0.5 * t.scale.x * 0.999;
+            var topY = (t.scale.y / 2) + 0.005;
+            var videoGeo = new THREE.CircleGeometry(radius, 5);
+            var videoMat = new THREE.MeshBasicMaterial({
+                map: videoTextures[v],
+                side: THREE.DoubleSide,
+                transparent: true
+            });
+            var videoMesh = new THREE.Mesh(videoGeo, videoMat);
+            videoMesh.rotation.x = -Math.PI / 2;
+            videoMesh.rotation.z = -THREE.Math.degToRad(16);
+            videoMesh.position.set(t.position.x, topY, t.position.z);
+            videoMesh.renderOrder = 20;
+            town.add(videoMesh);
+        }
+
+        // Logo-sticker bovenop de centrale toren
         var stickerSize = Math.max(0.5, topDiameter * 0.75);
         var stickerGeo = new THREE.PlaneGeometry(stickerSize, stickerSize);
         var textureLoader = new THREE.TextureLoader();
@@ -236,7 +354,7 @@ function init() {
             var textCenterZ = textPosZ;
             for (var j = town.children.length - 1; j >= 0; j--) {
                 var tower = town.children[j];
-                if (!tower.userData || !tower.userData.isTower || tower === targetCube) {
+                if (!tower.userData || !tower.userData.isTower || tower === targetCube || tower.userData.hasVideo) {
                     continue;
                 }
                 var dxText = tower.position.x - textCenterX;
