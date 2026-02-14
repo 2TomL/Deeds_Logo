@@ -171,16 +171,23 @@ function init() {
     };
     //----------------------------------------------------------------- Particular
   
-    var gmaterial = new THREE.MeshToonMaterial({color:0xFFFF00, side:THREE.DoubleSide});
-    var gparticular = new THREE.CircleGeometry(0.01, 3);
-    var aparticular = 5;
+    // Minder zichtbare rook: donkere kleur, transparant en veel minder deeltjes
+    var gmaterial = new THREE.MeshToonMaterial({
+        color: 0x222222,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.18
+    });
+    var gparticular = new THREE.CircleGeometry(0.005, 3);
+    var aparticular = 4;
   
-    for (var h = 1; h<200; h++) {
+    for (var h = 1; h < 12; h++) {
         var particular = new THREE.Mesh(gparticular, gmaterial);
-        particular.position.set(mathRandom(aparticular), mathRandom(aparticular),mathRandom(aparticular));
-        particular.rotation.set(mathRandom(),mathRandom(),mathRandom());
+        particular.position.set(mathRandom(aparticular), mathRandom(aparticular), mathRandom(aparticular));
+        particular.rotation.set(mathRandom(), mathRandom(), mathRandom());
         smoke.add(particular);
     };
+
   
     var pmaterial = new THREE.MeshPhongMaterial({
         color:0x000000,
@@ -395,7 +402,7 @@ function init() {
             town.add(textMesh);
 
             var textSize2 = textSize * 0.25; 
-            var textHeight2 = textHeight * 0.8; 
+            var textHeight2 = textHeight * 0.8; // Iets minder diepte
             var textGeo2 = new THREE.TextGeometry('APEX Demi-GOD Gamer', {
                 font: font,
                 size: textSize2,
@@ -590,8 +597,9 @@ var animate = function() {
         //object.rotation.z = (Math.cos((time/object.rotationValue) * Math.PI / 180) * 180);
     }
   
-    smoke.rotation.y += 0.01;
-    smoke.rotation.x += 0.01;
+    // Langzamere rotatie van smoke om het effect subtieler te maken
+    smoke.rotation.y += 0.003;
+    smoke.rotation.x += 0.003;
   
     // Kijkpunt iets boven het midden zodat de bovenkant van de cubes zichtbaar is
     camera.lookAt(new THREE.Vector3(0, 0, 0));
