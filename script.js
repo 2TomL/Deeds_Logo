@@ -23,7 +23,8 @@ function onWindowResize() {
 
 var camera = new THREE.PerspectiveCamera( 20, window.innerWidth / window.innerHeight, 1, 500 );
 
-camera.position.set(0, 2, 17);
+// Zet de camera hoger en iets naar voren zodat de bovenkant van de cubes zichtbaar is
+camera.position.set(0, 8, 17);
 
 var scene = new THREE.Scene();
 var city = new THREE.Object3D();
@@ -100,6 +101,8 @@ function setTintColor() {
 
 function init() {
     var segments = 2;
+    // Zorg dat de stad in het midden staat (optioneel, meestal 0,0,0)
+    city.position.set(0, 0, 0);
     var occupiedPositions = {};
     for (var i = 1; i<100; i++) {
         var geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 5);
@@ -136,11 +139,6 @@ function init() {
         cube.rotationValue = 0.1+Math.abs(mathRandom(8));
         cube.scale.y = 0.1+Math.abs(mathRandom(8));
         cube.scale.y = Math.min(cube.scale.y, 3);
-        //TweenMax.to(cube.scale, 1, {y:cube.rotationValue, repeat:-1, yoyo:true, delay:i*0.005, ease:Power1.easeInOut});
-        /*cube.setScale = 0.1+Math.abs(mathRandom());
-    
-        TweenMax.to(cube.scale, 4, {y:cube.setScale, ease:Elastic.easeInOut, delay:0.2*i, yoyo:true, repeat:-1});
-        TweenMax.to(cube.position, 4, {y:cube.setScale / 2, ease:Elastic.easeInOut, delay:0.2*i, yoyo:true, repeat:-1});*/
     
         var cubeWidth = 0.9;
         cube.scale.x = cube.scale.z = cubeWidth+mathRandom(1-cubeWidth);
@@ -396,10 +394,9 @@ function init() {
             textMesh.receiveShadow = true;
             town.add(textMesh);
 
-            // Voeg tweede tekst toe: "APEX Demi-GOD Lord Gamer"
-            var textSize2 = textSize * 0.25; // Kleiner lettertype (25% van DEEDS)
-            var textHeight2 = textHeight * 0.8; // Iets minder diepte
-            var textGeo2 = new THREE.TextGeometry('APEX Demi-GOD Lord Gamer', {
+            var textSize2 = textSize * 0.25; 
+            var textHeight2 = textHeight * 0.8; 
+            var textGeo2 = new THREE.TextGeometry('APEX Demi-GOD Gamer', {
                 font: font,
                 size: textSize2,
                 height: textHeight2,
@@ -460,38 +457,7 @@ function init() {
             town.add(mikeyTextMesh);
         });
 
-        // ROC Esports logo met glitch effect op de grond
-        var rocTextureLoader = new THREE.TextureLoader();
-        rocTextureLoader.load('assets/ROC_Esports_2024_allmode.png', function(rocTexture) {
-            rocTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            
-            var logoSize = topDiameter * 0.48;
-            var logoGeo = new THREE.PlaneGeometry(logoSize, logoSize);
-            
-            // Maak meerdere lagen voor glitch/raster effect
-            for (var glitchLayer = 0; glitchLayer < 5; glitchLayer++) {
-                var logoMat = new THREE.MeshBasicMaterial({
-                    map: rocTexture,
-                    transparent: true,
-                    opacity: 0.3 - (glitchLayer * 0.05),
-                    side: THREE.DoubleSide,
-                    color: glitchLayer % 2 === 0 ? 0xFFFFFF : 0xFF00FF
-                });
-                var logoMesh = new THREE.Mesh(logoGeo, logoMat);
-                logoMesh.rotation.x = -Math.PI / 2;
-                
-                // Positioneer op de grond met kleine random offsets voor glitch effect
-                var offsetX = (Math.random() - 0.5) * 0.05;
-                var offsetZ = (Math.random() - 0.5) * 0.05;
-                logoMesh.position.set(
-                    targetCube.position.x - topDiameter * 0.8 + offsetX,
-                    0.015 + (glitchLayer * 0.001),
-                    targetCube.position.z + offsetZ
-                );
-                logoMesh.renderOrder = 5 + glitchLayer;
-                town.add(logoMesh);
-            }
-        });
+        // ROC Esports logo verwijderd
     }
 };
 
@@ -627,7 +593,8 @@ var animate = function() {
     smoke.rotation.y += 0.01;
     smoke.rotation.x += 0.01;
   
-    camera.lookAt(city.position);
+    // Kijkpunt iets boven het midden zodat de bovenkant van de cubes zichtbaar is
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
     renderer.render( scene, camera );  
 }
 
