@@ -76,7 +76,7 @@ var setcolor = 0xF02050;
 //var setcolor = 0xFF6347;
 
 scene.background = new THREE.Color(setcolor);
-scene.fog = new THREE.Fog(setcolor, 12, 22);
+scene.fog = new THREE.Fog(setcolor, 14, 26);
 //scene.fog = new THREE.FogExp2(setcolor, 0.05);
 //----------------------------------------------------------------- RANDOM Function
 function mathRandom(num = 8) {
@@ -171,30 +171,23 @@ function init() {
     };
     //----------------------------------------------------------------- Particular
   
-    // Minder zichtbare rook: donkere kleur, transparant en veel minder deeltjes
-    var gmaterial = new THREE.MeshToonMaterial({
-        color: 0x222222,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.18
-    });
-    var gparticular = new THREE.CircleGeometry(0.005, 3);
-    var aparticular = 4;
+    var gmaterial = new THREE.MeshToonMaterial({color:0xFFFF00, side:THREE.DoubleSide});
+    var gparticular = new THREE.CircleGeometry(0.01, 3);
+    var aparticular = 5;
   
-    for (var h = 1; h < 12; h++) {
+    for (var h = 1; h<200; h++) {
         var particular = new THREE.Mesh(gparticular, gmaterial);
-        particular.position.set(mathRandom(aparticular), mathRandom(aparticular), mathRandom(aparticular));
-        particular.rotation.set(mathRandom(), mathRandom(), mathRandom());
+        particular.position.set(mathRandom(aparticular), mathRandom(aparticular),mathRandom(aparticular));
+        particular.rotation.set(mathRandom(),mathRandom(),mathRandom());
         smoke.add(particular);
     };
-
   
     var pmaterial = new THREE.MeshPhongMaterial({
         color:0x000000,
         side:THREE.DoubleSide,
         roughness: 10,
         metalness: 0.6,
-        opacity:0.9,
+        opacity:0.4,
         transparent:true});
     var pgeometry = new THREE.PlaneGeometry(60,60);
     var pelement = new THREE.Mesh(pgeometry, pmaterial);
@@ -597,9 +590,8 @@ var animate = function() {
         //object.rotation.z = (Math.cos((time/object.rotationValue) * Math.PI / 180) * 180);
     }
   
-    // Langzamere rotatie van smoke om het effect subtieler te maken
-    smoke.rotation.y += 0.003;
-    smoke.rotation.x += 0.003;
+    smoke.rotation.y += 0.01;
+    smoke.rotation.x += 0.01;
   
     // Kijkpunt iets boven het midden zodat de bovenkant van de cubes zichtbaar is
     camera.lookAt(new THREE.Vector3(0, 0, 0));
